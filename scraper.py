@@ -116,23 +116,29 @@ def get_chrome_main_version():
     return 125 # Giá trị mặc định an toàn nếu không tìm thấy
 
 def setup_driver(headless=False, version_main=None):
-    options = uc.ChromeOptions()
-    options.add_argument('--no-first-run --no-service-autorun --password-store=basic')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    options.add_argument('--disable-gpu')
-    
-    if headless:
-        options.add_argument('--headless')
-    
-    # Nếu trên Cloud, chúng ta ưu tiên version_main tự động hoặc do người dùng nhập
+    def get_options():
+        options = uc.ChromeOptions()
+        options.add_argument('--no-first-run --no-service-autorun --password-store=basic')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--disable-gpu')
+        if headless:
+            options.add_argument('--headless')
+        return options
+
+    # Lượt 1: Thử với version_main
     try:
-        driver = uc.Chrome(options=options, version_main=version_main)
+        driver = uc.Chrome(options=get_options(), version_main=version_main)
         return driver
     except Exception as e:
-        print(f"Lỗi khởi tạo driver lượt 1: {e}")
-        # Thử lại không có version_main
-        return uc.Chrome(options=options)
+        print(f"Lỗi khởi tạo driver lượt 1 (với version {version_main}): {e}")
+        
+        # Lượt 2: Thử lại không có version_main (để uc tự nhận diện)
+        try:
+            return uc.Chrome(options=get_options())
+        except Exception as e2:
+            print(f"Lỗi khởi tạo driver lượt 2: {e2}")
+            raise e2
 
 def extract_data_from_html(html):
     soup = BeautifulSoup(html, 'html.parser')
