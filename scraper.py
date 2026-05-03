@@ -126,15 +126,18 @@ def setup_driver(headless=False, version_main=None):
             options.add_argument('--headless')
         return options
 
-    # Lượt 1: Thử với version_main
+    # Lượt 1: Thử với version_main được truyền vào (từ giao diện hoặc tự động nhận diện)
     try:
         driver = uc.Chrome(options=get_options(), version_main=version_main)
         return driver
     except Exception as e:
-        print(f"Lỗi khởi tạo driver lượt 1 (với version {version_main}): {e}")
+        error_msg = str(e)
+        print(f"Lỗi khởi tạo driver lượt 1: {error_msg}")
         
-        # Lượt 2: Thử lại không có version_main (để uc tự nhận diện)
+        # Lượt 2: Nếu lỗi lệch phiên bản (session not created), thử lại không dùng version_main
+        # Để thư viện undetected-chromedriver tự động tải bản phù hợp nhất.
         try:
+            print("Đang thử lại lượt 2 (để hệ thống tự chọn phiên bản)...")
             return uc.Chrome(options=get_options())
         except Exception as e2:
             print(f"Lỗi khởi tạo driver lượt 2: {e2}")
