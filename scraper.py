@@ -96,24 +96,17 @@ def get_chrome_main_version():
     except (ImportError, Exception):
         pass
 
-    # 2. Thử trên Linux (Dành cho Cloud/VPS)
-    try:
-        import subprocess
-        output = subprocess.check_output(['google-chrome', '--version'], stderr=subprocess.STDOUT)
-        version = output.decode('utf-8').strip().split()[-1]
-        return int(version.split('.')[0])
-    except (FileNotFoundError, Exception):
-        pass
+    # 2. Thử trên Linux (Cloud/VPS) - Kiểm tra nhiều tên lệnh khác nhau
+    for cmd in ['google-chrome', 'chromium', 'chromium-browser']:
+        try:
+            import subprocess
+            output = subprocess.check_output([cmd, '--version'], stderr=subprocess.STDOUT)
+            version_str = output.decode('utf-8').strip().split()[-1]
+            return int(version_str.split('.')[0])
+        except (FileNotFoundError, Exception):
+            continue
 
-    try:
-        import subprocess
-        output = subprocess.check_output(['chromium', '--version'], stderr=subprocess.STDOUT)
-        version = output.decode('utf-8').strip().split()[-1]
-        return int(version.split('.')[0])
-    except (FileNotFoundError, Exception):
-        pass
-
-    return 125 # Giá trị mặc định an toàn nếu không tìm thấy
+    return 125 # Giá trị mặc định cuối cùng
 
 def setup_driver(headless=False, version_main=None):
     def get_options():
