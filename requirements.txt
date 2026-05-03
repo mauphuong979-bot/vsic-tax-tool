@@ -4,4 +4,3 @@ selenium
 undetected-chromedriver
 beautifulsoup4
 openpyxl
-lsb-release
